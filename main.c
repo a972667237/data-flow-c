@@ -21,12 +21,14 @@ struct Active_Data;
 struct DF_TargetADList;
 struct DF_Fun_Node;
 struct DF_TargetFunList;
+struct DF_SourceItem;
 typedef struct DF_Ready_Flags DF_Ready;
 typedef struct DF_Fun_DC DF_DC;
 typedef struct Active_Data DF_AD;
 typedef struct DF_TargetADList DF_TADL;
 typedef struct DF_Fun_Node DF_FN;
 typedef struct DF_TargetFunList DF_TFL;
+typedef struct DF_SourceItem DF_SI;
 
 struct DF_Ready_Flags {
     int Flags;
@@ -84,10 +86,17 @@ struct DF_TargetFunList{
     DF_FN **Target;      //输出目标的数据流函数指针线性表
 };   //线性表结构
 
+struct DF_SourceItem{
+    int stop;
+    DF_FN* F;
+};
+
 
 
 DF_TFL DF_TFL_TABLE;
 threadpool_t *pool;
+DF_SI* source_list;
+int source_list_len;
 
 // DF_AD  c1_ad,c2_ad,a1_ad,b1_ad;//编译器加入
 // comment it
@@ -384,11 +393,29 @@ void DF_Thread_Init(int threadnum, int queuesize) {
         pool = threadpool_create(threadnum, queuesize, 0);
 }
 
+void DF_SourceInit(int sourcenum, ...) {
+    va_list ap;
+    va_start(ap, sourcenum);
+    DF_FN* source_fn_addr;
+
+    source_list_len = sourcenum;
+    source_list = (DF_SI*)malloc(sizeof(DF_SI) * sourcenum);
+
+    for (int i=0; i<sourcenum; i++) {
+        source_fn_addr = va_arg(ap, DF_FN*);
+        source_list[i].F = source_fn_addr;
+        source_list[i].stop = 0;
+    }
+}
+
 void DF_Loop() {
     // will replace with get from a list to use many source
     while(1) {
-        threadpool_add(pool, (void (*)(void *))(SOURCE_A_FN.Func), NULL, 0);
-        threadpool_add(pool, (void (*)(void *))(SOURCE_A_FN.Func), NULL, 0);
+        for (int i=0; i<source_list_len; i++) {
+            if (!source_list[i].stop) {
+                threadpool_add(pool, (void (*)(void *))(source_list[i].F->Func), NULL, 0);
+            }
+        }
         sleep(5);
     }
 }
@@ -407,6 +434,10 @@ void DF_Run (void* source_data_addr, int datasize, int elementcount) {
     DF_Destory();
 }
 
+void DF_Source_Stop(int item_index) {
+    source_list[item_index].stop = 1;
+}
+
 void SOURCEA() {
     // need to get count and update finish count
     
@@ -417,6 +448,10 @@ void SOURCEA() {
 
     {
         DF_source = DF_count * 2 + 1;
+
+        if(DF_count == 10) {
+            DF_Source_Stop(0);
+        }
     }
     
     DF_AD_UpData(&SOURCE_A_FN, &DF_source, sizeof(DF_source));
@@ -554,6 +589,8 @@ int main() {
 
     DF_FNInit1(&D_FN, &FUND, "FUND", 2, &c_ad, &d_ad);
     DF_FNInit2(&D_FN, 1, &DF_output_ad);
+
+    DF_SourceInit(1, &SOURCE_A_FN);
     // init by compiler
 
     DF_Init(4, &A_FN, &B_FN, &C_FN, &D_FN);
