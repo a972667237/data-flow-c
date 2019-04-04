@@ -108,6 +108,8 @@ int threadpool_add(threadpool_t *pool, void (*routine)(void *),
  */
 int threadpool_destroy(threadpool_t *pool, int flags);
 
+int threadpool_is_idle(threadpool_t *pool);
+
 #ifdef __cplusplus
 }
 #endif
