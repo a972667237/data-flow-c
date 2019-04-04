@@ -95,6 +95,7 @@ struct threadpool_t {
   pthread_cond_t notify;
   pthread_t *threads;
   threadpool_task_t *queue;
+  int thread_in_run_count;
   int thread_count;
   int queue_size;
   int head;
@@ -136,6 +137,7 @@ threadpool_t *threadpool_create(int thread_count, int queue_size, int flags)
     pool->queue_size = queue_size;
     pool->head = pool->tail = pool->count = 0;
     pool->shutdown = pool->started = 0;
+    pool->thread_in_run_count = 0;
 
     /* Allocate thread and task queue */
     /* 申请线程数组和任务队列所需的内存 */
@@ -344,6 +346,7 @@ static void *threadpool_thread(void *threadpool)
         task.function = pool->queue[pool->head].function;
         task.argument = pool->queue[pool->head].argument;
         /* 更新 head 和 count */
+        pool->thread_in_run_count += 1;
         pool->head += 1;
         pool->head = (pool->head == pool->queue_size) ? 0 : pool->head;
         pool->count -= 1;
@@ -356,6 +359,7 @@ static void *threadpool_thread(void *threadpool)
         /* 开始运行任务 */
         (*(task.function))(task.argument);
         /* 这里一个任务运行结束 */
+        pool->thread_in_run_count -= 1;
     }
 
     /* 线程将结束，更新运行线程数 */
@@ -364,4 +368,9 @@ static void *threadpool_thread(void *threadpool)
     pthread_mutex_unlock(&(pool->lock));
     pthread_exit(NULL);
     return(NULL);
+}
+
+int threadpool_is_idle(threadpool_t *pool) {
+    return (pool->count == 0) &&
+        (pool->thread_in_run_count == 0);
 }

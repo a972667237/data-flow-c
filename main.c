@@ -408,9 +408,26 @@ void DF_SourceInit(int sourcenum, ...) {
     }
 }
 
+int DF_Should_Stop() {
+    // queue is 0
+    // in run count is 0 (mean that not task run)
+    // all source is stop
+    int all_stop = 1;
+    for (int i=0; i<source_list_len; i++) {
+        if(source_list[i].stop == 0) {
+            all_stop = 0;
+            break;
+        }
+    }
+    return threadpool_is_idle(pool)  && all_stop;
+}
+
 void DF_Loop() {
     // will replace with get from a list to use many source
     while(1) {
+        if (DF_Should_Stop()) {
+            break;
+        }
         for (int i=0; i<source_list_len; i++) {
             if (!source_list[i].stop) {
                 threadpool_add(pool, (void (*)(void *))(source_list[i].F->Func), NULL, 0);
