@@ -14,18 +14,18 @@ DF_FN SOURCE_A_FN, SOURCE_B_FN, S_FN;
 
 void SOURCEA() {
     int DF_count;
-    int DF_source;
+    int DF_source_A;
 
     DF_SOURCE_Get_And_Update(&SOURCE_A_FN, &DF_count);
 
     {
-        DF_source = DF_count;
+        DF_source_A = DF_count;
 
         if(DF_count == 9) {
             DF_Source_Stop(&DF_TFL_TABLE, 0);
         }
     }
-    DF_AD_UpData(&DF_TFL_TABLE, &SOURCE_A_FN, &DF_source, sizeof(DF_source));
+    DF_AD_UpData(&DF_TFL_TABLE, &SOURCE_A_FN, &DF_source_A, sizeof(DF_source_A));
 }
 
 void SOURCEB() {
