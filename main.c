@@ -63,7 +63,7 @@ void FUNS() {
 int main() {
     DF_ADInit(&DF_source_ad_a, 4, 1);
     DF_ADInit(&DF_source_ad_b, 4, 1);
-    DF_ADInit(&DF_output_ad, 4, 1);
+    DF_ADInit(&DF_output_ad, 4, 0);
 
     DF_FNInit1(&SOURCE_A_FN, &SOURCEA, "SA", 0);
     DF_FNInit2(&SOURCE_A_FN, 1, &DF_source_ad_a);
@@ -76,12 +76,9 @@ int main() {
 
     DF_SourceInit(&DF_TFL_TABLE, 2, &SOURCE_A_FN, &SOURCE_B_FN);
     DF_Init(&DF_TFL_TABLE, 3, &SOURCE_A_FN, &SOURCE_B_FN, &S_FN);
-    // compile
 
 
     DF_Run(&DF_TFL_TABLE); // run and destory data
     
-    // source tail
     return 0;
-    // source tail end
 }
