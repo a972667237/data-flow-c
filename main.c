@@ -1,9 +1,7 @@
 #include <stdio.h>
-#include <pthread.h>
-#include <string.h>
 #include <stdlib.h>
-#include <stdarg.h>
 
+#include <pthread.h>
 #include "threadpool.h"
 #include "dfc.h"
 
