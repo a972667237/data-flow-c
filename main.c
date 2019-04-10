@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <pthread.h>
+
 #include "threadpool.h"
 #include "dfc.h"
 
@@ -21,7 +21,7 @@ void SOURCEA() {
     {
         DF_source_A = DF_count;
 
-        if(DF_count == 9) {
+        if(DF_count == 99) {
             DF_Source_Stop(&DF_TFL_TABLE, 0);
         }
     }
@@ -38,7 +38,7 @@ void SOURCEB() {
         DF_source_B = 100 - DF_count;
         printf("b: %d\n", DF_source_B);
 
-        if (DF_count == 9) {
+        if (DF_count == 99) {
             DF_Source_Stop(&DF_TFL_TABLE, 1);
         }
     }

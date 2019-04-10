@@ -59,6 +59,7 @@ typedef enum {
 typedef struct {
     void (*function)(void *);
     void *argument;
+    int item_index;
 } threadpool_task_t;
 
 /**
@@ -213,6 +214,7 @@ int threadpool_add(threadpool_t *pool, void (*function)(void *),
         /* 在 tail 的位置放置函数指针和参数，添加到任务队列 */
         pool->queue[pool->tail].function = function;
         pool->queue[pool->tail].argument = argument;
+        pool->queue[pool->tail].item_index = flags;
         /* 更新 tail 和 count */
         pool->tail = next;
         pool->count += 1;
@@ -373,4 +375,46 @@ static void *threadpool_thread(void *threadpool)
 int threadpool_is_idle(threadpool_t *pool) {
     return (pool->count == 0) &&
         (pool->thread_in_run_count == 0);
+}
+
+int threadpool_queue_count(threadpool_t *pool) {
+    return pool->count;
+}
+
+void order_by_item_and_hash(threadpool_t *pool, void (**Target) (void *),int* item_index_order, int item_index_count, int should_hash) {
+    pthread_mutex_lock(&(pool->lock));
+    int* counter = (int*)malloc(item_index_count * sizeof(int));
+    for (int i=0; i<item_index_count; i++)
+        counter[i] = 0;
+    for (int i=pool->head; i == pool->tail; i = (i + 1) % pool->queue_size) {
+        counter[pool->queue[i].item_index] ++;
+    }
+    if (should_hash) {
+        for (int i=pool->head, item_pointer=0; i == pool->tail; i = (i+1) % pool->queue_size) {
+            while(1) {
+                // 找到一个可以开始计算的地方
+                if (counter[item_index_order[item_pointer]] == 0 ) {
+                    // 木有计数了，后移并继续
+                    item_pointer = (item_pointer + 1) % item_index_count;
+                    continue;
+                } else {
+                    counter[item_index_order[item_pointer]] --;
+                    pool->queue[i].function = Target[item_index_order[item_pointer]];
+                    pool->queue[i].item_index = item_index_order[item_pointer];
+                    item_pointer = (item_pointer + 1) % item_index_count;
+                    break;
+                }
+            }
+        }
+    } else {
+        for (int i=0, j = pool->head, now; i<item_index_count; i++) {
+            now = item_index_order[i];
+            while(counter[now]--) {
+                pool->queue[j].function = Target[now];
+                pool->queue[j].item_index = now;
+                j = (j + 1) % pool->queue_size;
+            }
+        }
+    }
+    pthread_mutex_unlock(&(pool->lock));
 }

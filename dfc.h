@@ -27,6 +27,11 @@ struct DF_TargetFunList{
     threadpool_t* pool;
     DF_SI* source_list;
     int source_list_len;
+    DF_AD** output_list;
+    int output_list_len;
+    void (**Func_Target) (void *);
+    int* item_index_order;
+    int should_hash;
 };   //线性表结构
 
 struct Active_Data{
@@ -52,6 +57,7 @@ struct DF_Fun_Node {
     //DF_FN     * next_ready_on_CPU;                //>挂入某个CPU的就绪队列
     //DF_sched_data sched_data;                 //调度>数据
     //DF_DAG_node   DAG_node;                       //>数据流图节点
+    int item_index;
     void        (*Func)(void);                      //>数据流函数
     unsigned        char * Name;                    //>函数名
     DF_Ready*       ready;
