@@ -109,6 +109,13 @@ int threadpool_add(threadpool_t *pool, void (*routine)(void *),
 int threadpool_destroy(threadpool_t *pool, int flags);
 
 int threadpool_is_idle(threadpool_t *pool);
+void queue_info(threadpool_t *pool, int* count, int** index);
+
+int threadpool_queue_count(threadpool_t *pool);
+
+int* get_thread_info_addr(threadpool_t *pool);
+
+void order_by_item_and_hash(threadpool_t *pool, void (**Target) (void *),int* item_index_order, int item_index_count, int should_hash);
 
 #ifdef __cplusplus
 }
