@@ -446,8 +446,8 @@ void DF_Destory_And_Update_Final_Data(DF_TFL* table) {
     DF_Destory_TFL(table);
 }
 
-int* DF_Result() {
-    return NULL;
+void** DF_Result(DF_TFL *table) {
+    return table->result;
 }
 
 void DF_Run (DF_TFL *table) {
