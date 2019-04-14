@@ -365,7 +365,85 @@ void DF_Loop(DF_TFL* table) {
     }
 }
 
-void DF_Destory() {
+void DF_Update_output(DF_TFL* table) {
+    table->result = (void**)malloc(sizeof(void*) * table->output_list_len);
+    DF_AD* temp_ad;
+
+    for (int i = 0; i < table->output_list_len; i++) {
+        temp_ad = table->output_list[i];
+        int data_count = temp_ad->Data_Count;
+        int data_size = temp_ad->persize - INTSIZE;
+        table->result[i] = (void*)malloc(data_size * data_count);
+        for (int j = 0; j < data_count; j++) {
+            memcpy(table->result[i] + (j * data_size), temp_ad->Data + ((temp_ad->Head + j) * temp_ad->persize), data_size);
+        }
+    }
+}
+
+void DF_Destory_Ready(DF_FN* fun_node) {
+    DF_Ready* temp_ready;
+    DF_Ready* save;
+    temp_ready = fun_node->ready;
+
+    while(temp_ready) {
+        save = temp_ready->next;
+        free(temp_ready);
+        temp_ready = save;
+    }
+}
+
+void DF_Destory_AD(DF_TADL* output) {
+    int Num = output->TargetNum;
+    DF_AD* temp_ad;
+    for (int i=0; i<Num; i++) {
+        temp_ad = output->Target[i];
+        free(temp_ad->Data);
+        free(temp_ad->DF_Fun_Index);
+        free(temp_ad->DF_flag_Index);
+    }
+}
+
+void DF_Destory_TADL(DF_FN* fun_node) {
+    free(fun_node->DF_Fun_AD_InPut);
+    DF_Destory_AD(fun_node->DF_Fun_AD_OutPut);
+    free(fun_node->DF_Fun_AD_OutPut);
+}
+
+void DF_Destory_FN(DF_TFL* table) {
+    DF_FN* temp_fn;
+    for (int i=0; i<table->Num; i++) {
+        temp_fn = table->Target[i];
+        DF_Destory_Ready(temp_fn);
+        DF_Destory_TADL(temp_fn);
+    }
+    free(table->Target);
+}
+
+void DF_Destory_source(DF_TFL* table) {
+    free(table->source_list);
+}
+
+void DF_Destory_TFL(DF_TFL* table) {
+    threadpool_destroy(table->pool, 0);
+    free(table->output_list);
+    free(table->Func_Target);
+    free(table->item_index_order);
+    free(table->thread_task);
+}
+
+void DF_Destory_And_Update_Final_Data(DF_TFL* table) {
+
+    // update to output_list
+    DF_Update_output(table);
+
+    // free FN
+    DF_Destory_FN(table);
+
+    // free source
+    DF_Destory_source(table);
+
+    // free TFL
+    DF_Destory_TFL(table);
 }
 
 int* DF_Result() {
@@ -376,7 +454,7 @@ void DF_Run (DF_TFL *table) {
     DF_Thread_Init(table, 10, 64);
     DF_Loop(table);
    // DF_Source_Init(source_data_addr, datasize, elementcount); // fixed by user
-    DF_Destory();
+    DF_Destory_And_Update_Final_Data(table);
 }
 
 void DF_Source_Stop(DF_TFL *table, int item_index) {

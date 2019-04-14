@@ -29,6 +29,7 @@ struct DF_TargetFunList{
     int source_list_len;
     DF_AD** output_list;
     int output_list_len;
+    void** result;
     void (**Func_Target) (void *);
     int* item_index_order;
     int should_hash;
