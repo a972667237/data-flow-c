@@ -6,6 +6,7 @@
 
 #include "threadpool.h"
 #include "dfc.h"
+#include "c_printf.h"
 
 struct DF_Ready_Flags;
 struct DF_Fun_DC;
@@ -317,13 +318,13 @@ void printf_thread_info(DF_TFL* table) {
 
     for (int i=0; i<table->thread_num; i++) {
         if (table->thread_task[i] != -1)
-            printf("Thread: %d, %s\n", i, table->Target[table->thread_task[i]]->Name);
+            c_printf("Thread: %d, [g]%s\n", i, table->Target[table->thread_task[i]]->Name);
         else
-            printf("Thread: %d, NULL\n", i);
+            c_printf("Thread: %d, [r]%s\n", i, "NULL");
     }
 
     for (int i=0; i<table->Num; i++) {
-        printf("Func: %s, Count: %d\n", table->Target[i]->Name, table->Target[i]->FinishNum);
+        c_printf("Func: [m]%s, Count: [m]%d\n", table->Target[i]->Name, table->Target[i]->FinishNum);
     }
 
     int count;
@@ -332,8 +333,7 @@ void printf_thread_info(DF_TFL* table) {
     queue_info(table->pool, &count, index);
     
     for (int i=0; i<count; i++) {
-        printf("%d\n", (*index)[i]);
-        printf("Queue: %d, %s\n", i, table->Target[(*index)[i]]->Name);
+        c_printf("Queue: %d, [c]%s\n", i, table->Target[(*index)[i]]->Name);
         
     }
 }
