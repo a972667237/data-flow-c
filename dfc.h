@@ -32,6 +32,8 @@ struct DF_TargetFunList{
     void (**Func_Target) (void *);
     int* item_index_order;
     int should_hash;
+    int thread_num;
+    int* thread_task;
 };   //线性表结构
 
 struct Active_Data{
@@ -83,6 +85,7 @@ void DF_SourceInit(DF_TFL *table, int sourcenum, ...);
 int* DF_Result();
 void DF_Run (DF_TFL *table);
 void DF_Source_Stop(DF_TFL *table, int item_index);
+void printf_thread_info(DF_TFL* table);
 #ifdef __cplusplus
 }
 #endif

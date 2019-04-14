@@ -96,6 +96,7 @@ struct threadpool_t {
   pthread_cond_t notify;
   pthread_t *threads;
   threadpool_task_t *queue;
+  int* thread_task;
   int thread_in_run_count;
   int thread_count;
   int queue_size;
@@ -106,6 +107,11 @@ struct threadpool_t {
   int started;
 };
 
+typedef struct pool_index_record {
+  void* pool;  
+  int index;
+} record ;
+
 /**
  * @function void *threadpool_thread(void *threadpool)
  * @brief the worker thread
@@ -115,7 +121,7 @@ struct threadpool_t {
  * 线程池里每个线程在跑的函数
  * 声明 static 应该只为了使函数只在本文件内有效
  */
-static void *threadpool_thread(void *threadpool);
+static void *threadpool_thread(void* param);
 
 int threadpool_free(threadpool_t *pool);
 
@@ -143,6 +149,7 @@ threadpool_t *threadpool_create(int thread_count, int queue_size, int flags)
     /* Allocate thread and task queue */
     /* 申请线程数组和任务队列所需的内存 */
     pool->threads = (pthread_t *)malloc(sizeof(pthread_t) * thread_count);
+    pool->thread_task = (int *)malloc(sizeof(int) * thread_count);
     pool->queue = (threadpool_task_t *)malloc
         (sizeof(threadpool_task_t) * queue_size);
 
@@ -158,8 +165,13 @@ threadpool_t *threadpool_create(int thread_count, int queue_size, int flags)
     /* Start worker threads */
     /* 创建指定数量的线程开始运行 */
     for(i = 0; i < thread_count; i++) {
+        record *pool_record;
+        pool_record = (record*)malloc(sizeof(record));
+        pool_record->pool = (void*)pool;
+        pool_record->index = i;
+        pool->thread_task[i] = -1;
         if(pthread_create(&(pool->threads[i]), NULL,
-                          threadpool_thread, (void*)pool) != 0) {
+                          threadpool_thread, (void*)pool_record) != 0) {
             threadpool_destroy(pool, 0);
             return NULL;
         }
@@ -318,9 +330,11 @@ int threadpool_free(threadpool_t *pool)
 }
 
 
-static void *threadpool_thread(void *threadpool)
+static void *threadpool_thread(void* param)
 {
-    threadpool_t *pool = (threadpool_t *)threadpool;
+    record *pool_record = (record*)param;
+    threadpool_t *pool = (threadpool_t *)pool_record->pool;
+    int index = pool_record->index;
     threadpool_task_t task;
 
     for(;;) {
@@ -352,6 +366,7 @@ static void *threadpool_thread(void *threadpool)
         pool->head += 1;
         pool->head = (pool->head == pool->queue_size) ? 0 : pool->head;
         pool->count -= 1;
+        pool->thread_task[index] = pool->queue[pool->head].item_index;
 
         /* Unlock */
         /* 释放互斥锁 */
@@ -361,7 +376,10 @@ static void *threadpool_thread(void *threadpool)
         /* 开始运行任务 */
         (*(task.function))(task.argument);
         /* 这里一个任务运行结束 */
+        pthread_mutex_lock(&(pool->lock));
         pool->thread_in_run_count -= 1;
+        pool->thread_task[index] = -1;
+        pthread_mutex_unlock(&(pool->lock));
     }
 
     /* 线程将结束，更新运行线程数 */
@@ -379,6 +397,18 @@ int threadpool_is_idle(threadpool_t *pool) {
 
 int threadpool_queue_count(threadpool_t *pool) {
     return pool->count;
+}
+
+int* get_thread_info_addr(threadpool_t *pool) {
+    return pool->thread_task;
+}
+
+void queue_info(threadpool_t *pool, int* count, int** index) {
+    *count = pool->count;
+    *index = (int*)malloc(sizeof(int)*pool->count);
+    for (int i=0; i<pool->count; i++) {
+        (*index)[i] = pool->queue[(pool->head+i)%pool->queue_size].item_index;
+    }
 }
 
 void order_by_item_and_hash(threadpool_t *pool, void (**Target) (void *),int* item_index_order, int item_index_count, int should_hash) {
@@ -416,5 +446,6 @@ void order_by_item_and_hash(threadpool_t *pool, void (**Target) (void *),int* it
             }
         }
     }
+    free(counter);
     pthread_mutex_unlock(&(pool->lock));
 }

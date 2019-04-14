@@ -20,6 +20,7 @@ void SOURCEA() {
 
     {
         DF_source_A = DF_count;
+        sleep(4);
 
         if(DF_count == 99) {
             DF_Source_Stop(&DF_TFL_TABLE, 0);
@@ -36,7 +37,8 @@ void SOURCEB() {
 
     {
         DF_source_B = 100 - DF_count;
-        printf("b: %d\n", DF_source_B);
+        sleep(1);
+//        printf("b: %d\n", DF_source_B);
 
         if (DF_count == 99) {
             DF_Source_Stop(&DF_TFL_TABLE, 1);
@@ -55,12 +57,16 @@ void FUNS() {
     {
         // fun S
         DF_output_A = DF_source_A + DF_source_B;
-        printf("total: -- %d\n", DF_output_A);
+        //printf("output: %d\n", DF_output_A);
+        sleep(14);
+        //system("clear");
+        //printf("total: -- %d\n", DF_output_A);
     }
     DF_AD_UpData(&DF_TFL_TABLE, &S_FN, &DF_output_A, sizeof(DF_output_A));
 }
 
 int main() {
+    system("clear");
     DF_ADInit(&DF_source_ad_a, 4, 1);
     DF_ADInit(&DF_source_ad_b, 4, 1);
     DF_ADInit(&DF_output_ad, 4, 0);

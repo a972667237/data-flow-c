@@ -167,6 +167,7 @@ void DF_AD_UpData(DF_TFL *table, DF_FN *F,...){       //地址，地址，地址
                // if now flag == finish
                // fixme: not consider that if the queue is full
                threadpool_add(table->pool, (void (*)(void *))(temp_f->Func), NULL, temp_f->item_index);
+               printf_thread_info(table);
                // consider that it must full in head, so if fail, all fail
                temp_f->ready = temp_r->next;
                free(temp_r);
@@ -262,8 +263,10 @@ void DF_Init(DF_TFL* table, int InputFNNum, ...) {
 }
 
 void DF_Thread_Init(DF_TFL* table, int threadnum, int queuesize) {
-    if (!table->pool)
+    if (!table->pool){
+        table->thread_num = threadnum;
         table->pool = threadpool_create(threadnum, queuesize, 0);
+    }
 }
 
 void DF_SourceInit(DF_TFL *table, int sourcenum, ...) {
@@ -309,9 +312,36 @@ int DF_Should_Stop(DF_TFL* table) {
     return threadpool_is_idle(table->pool)  && all_stop;
 }
 
+void printf_thread_info(DF_TFL* table) {
+    system("clear");
+
+    for (int i=0; i<table->thread_num; i++) {
+        if (table->thread_task[i] != -1)
+            printf("Thread: %d, %s\n", i, table->Target[table->thread_task[i]]->Name);
+        else
+            printf("Thread: %d, NULL\n", i);
+    }
+
+    for (int i=0; i<table->Num; i++) {
+        printf("Func: %s, Count: %d\n", table->Target[i]->Name, table->Target[i]->FinishNum);
+    }
+
+    int count;
+    int** index;
+    index = (int**)malloc(sizeof(int*));
+    queue_info(table->pool, &count, index);
+    
+    for (int i=0; i<count; i++) {
+        printf("%d\n", (*index)[i]);
+        printf("Queue: %d, %s\n", i, table->Target[(*index)[i]]->Name);
+        
+    }
+}
+
 void DF_Loop(DF_TFL* table) {
     // will replace with get from a list to use many source
     int queue_count;
+    table->thread_task = get_thread_info_addr(table->pool);
     while(1) {
         if (DF_Should_Stop(table)) {
             break;
@@ -322,6 +352,7 @@ void DF_Loop(DF_TFL* table) {
             for (int i=0; i<table->source_list_len; i++) {
                 if (!table->source_list[i].stop) {
                     threadpool_add(table->pool, (void (*)(void *))(table->source_list[i].F->Func), NULL, table->source_list[i].F->item_index);
+                    printf_thread_info(table);
                 }
             }
         }
@@ -342,7 +373,7 @@ int* DF_Result() {
 }
 
 void DF_Run (DF_TFL *table) {
-    DF_Thread_Init(table, 2, 64);
+    DF_Thread_Init(table, 10, 64);
     DF_Loop(table);
    // DF_Source_Init(source_data_addr, datasize, elementcount); // fixed by user
     DF_Destory();
