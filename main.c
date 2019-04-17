@@ -81,6 +81,7 @@ int main() {
     DF_FNInit2(&S_FN, 1, &DF_output_ad);
 
     DF_SourceInit(&DF_TFL_TABLE, 2, &SOURCE_A_FN, &SOURCE_B_FN);
+    DF_OutputInit(&DF_TFL_TABLE, 1, &DF_output_ad);
     DF_Init(&DF_TFL_TABLE, 3, &SOURCE_A_FN, &SOURCE_B_FN, &S_FN);
 
 
