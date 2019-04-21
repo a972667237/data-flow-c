@@ -426,6 +426,9 @@ void order_by_item_and_hash(threadpool_t *pool, void (**Target) (void *),int* it
                 if (counter[item_index_order[item_pointer]] == 0 ) {
                     // 木有计数了，后移并继续
                     item_pointer = (item_pointer + 1) % item_index_count;
+                    if (pool->count == 0) {
+                        break;
+                    }
                     continue;
                 } else {
                     counter[item_index_order[item_pointer]] --;
