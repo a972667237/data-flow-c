@@ -20,7 +20,6 @@ void SOURCEA() {
 
     {
         DF_source_A = DF_count;
-        sleep(4);
 
         if(DF_count == 4) {
             DF_Source_Stop(&DF_TFL_TABLE, 0);
@@ -37,7 +36,6 @@ void SOURCEB() {
 
     {
         DF_source_B = 100 - DF_count;
-        sleep(1);
 //        printf("b: %d\n", DF_source_B);
 
         if (DF_count == 4) {
@@ -58,7 +56,6 @@ void FUNS() {
         // fun S
         DF_output_A = DF_source_A + DF_source_B;
         //printf("output: %d\n", DF_output_A);
-        sleep(3);
         //system("clear");
         //printf("total: -- %d\n", DF_output_A);
     }

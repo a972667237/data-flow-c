@@ -83,6 +83,7 @@ void DF_SOURCE_Get_And_Update(DF_FN* F, int* count);
 void DF_Init(DF_TFL* table, int InputFNNum, ...);
 void DF_Thread_Init(DF_TFL* table, int threadnum, int queuesize);
 void DF_SourceInit(DF_TFL *table, int sourcenum, ...);
+void DF_OutputInit(DF_TFL *table, int outputnum, ...);
 void** DF_Result(DF_TFL *table);
 void DF_Run (DF_TFL *table);
 void DF_Source_Stop(DF_TFL *table, int item_index);

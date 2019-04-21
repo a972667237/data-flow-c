@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include <sys/sysinfo.h>
+//#include <sys/sysinfo.h>
 
 #include "threadpool.h"
 #include "dfc.h"
@@ -473,7 +473,8 @@ void** DF_Result(DF_TFL *table) {
 }
 
 void DF_Run (DF_TFL *table) {
-    DF_Thread_Init(table, get_nprocs() * 2, 64);
+    //DF_Thread_Init(table, get_nprocs() * 2, 64);
+    DF_Thread_Init(table, 4, 64);
     DF_Loop(table);
    // DF_Source_Init(source_data_addr, datasize, elementcount); // fixed by user
     DF_Destory_And_Update_Final_Data(table);
