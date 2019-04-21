@@ -22,7 +22,7 @@ void SOURCEA() {
         DF_source_A = DF_count;
         sleep(4);
 
-        if(DF_count == 99) {
+        if(DF_count == 4) {
             DF_Source_Stop(&DF_TFL_TABLE, 0);
         }
     }
@@ -40,7 +40,7 @@ void SOURCEB() {
         sleep(1);
 //        printf("b: %d\n", DF_source_B);
 
-        if (DF_count == 99) {
+        if (DF_count == 4) {
             DF_Source_Stop(&DF_TFL_TABLE, 1);
         }
     }
@@ -58,7 +58,7 @@ void FUNS() {
         // fun S
         DF_output_A = DF_source_A + DF_source_B;
         //printf("output: %d\n", DF_output_A);
-        sleep(14);
+        sleep(3);
         //system("clear");
         //printf("total: -- %d\n", DF_output_A);
     }
@@ -86,6 +86,11 @@ int main() {
 
 
     DF_Run(&DF_TFL_TABLE); // run and destory data
+    void** result = DF_Result(&DF_TFL_TABLE);
+    int* output = (int*)result[0];
+    for(int i=0; i<10; i++) {
+        printf("result[0][%d]: %d\n", i, output[i]);
+    }
     
     return 0;
 }

@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <sys/sysinfo.h>
 
 #include "threadpool.h"
 #include "dfc.h"
@@ -176,6 +177,7 @@ void DF_AD_UpData(DF_TFL *table, DF_FN *F,...){       //地址，地址，地址
            pthread_mutex_unlock(&temp_f->ready_lock);
        }
        pthread_rwlock_unlock(&b->lock);
+       printf_thread_info(table);
    }
    va_end(ap);
 }
@@ -183,7 +185,7 @@ void DF_AD_UpData(DF_TFL *table, DF_FN *F,...){       //地址，地址，地址
 /*
  * Method: DF_AD_GetData
  * Input:
- *   - F: DF_FN, may get function data and count
+ *   - F: DF_FN, may get function data 
  *   - ...:
  *     - Data: void?, may a address link to ad
  *     - Size: Data size
@@ -342,6 +344,8 @@ void DF_Loop(DF_TFL* table) {
     // will replace with get from a list to use many source
     int queue_count;
     table->thread_task = get_thread_info_addr(table->pool);
+    int* count_list;
+    count_list = (int*)malloc(sizeof(int) * table->Num);
     while(1) {
         if (DF_Should_Stop(table)) {
             break;
@@ -358,6 +362,24 @@ void DF_Loop(DF_TFL* table) {
         }
 
         if (queue_count > 2) {
+            for(int i=0; i<table->Num; i++) {
+                count_list[i] = 0;
+            }
+            for(int i=0; i<table->thread_num; i++) {
+                if (table->thread_task[i] == -1)
+                    continue;
+                count_list[table->thread_task[i]] ++;
+            }
+            for(int i=0; i<table->Num; i++) {
+                int min_index = 0;
+                for(int j=1; j<table->Num; j++) {
+                    if (count_list[j] < count_list[min_index]) {
+                        min_index = j;
+                    }
+                }
+                count_list[min_index] = 999999;
+                table->item_index_order[i] = min_index;
+            }
             order_by_item_and_hash(table->pool, table->Func_Target, table->item_index_order, table->source_list_len, table->should_hash);
 
         }
@@ -451,7 +473,7 @@ void** DF_Result(DF_TFL *table) {
 }
 
 void DF_Run (DF_TFL *table) {
-    DF_Thread_Init(table, 10, 64);
+    DF_Thread_Init(table, get_nprocs() * 2, 64);
     DF_Loop(table);
    // DF_Source_Init(source_data_addr, datasize, elementcount); // fixed by user
     DF_Destory_And_Update_Final_Data(table);
