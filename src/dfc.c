@@ -474,7 +474,7 @@ void** DF_Result(DF_TFL *table) {
 
 void DF_Run (DF_TFL *table) {
     //DF_Thread_Init(table, get_nprocs() * 2, 64);
-    DF_Thread_Init(table, 4, 64);
+    DF_Thread_Init(table, 20, 64);
     DF_Loop(table);
    // DF_Source_Init(source_data_addr, datasize, elementcount); // fixed by user
     DF_Destory_And_Update_Final_Data(table);

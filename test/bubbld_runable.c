@@ -21,9 +21,12 @@ void SOURCEA() {
     DF_SOURCE_Get_And_Update(&SOURCE_A_FN, &DF_count);
 
     {
-        DF_source_A = (2 * DF_count) % count;
+        if (count % 2 == 0)
+            DF_source_A = (2 * DF_count) % (count - 1);
+        else
+            DF_source_A = (2 * DF_count) % (count - 1) + ((DF_count % (count - 1)) >= (count - 1)/2);
 
-        if (DF_count == (count * (count - 1)) / 2 ) {
+        if (DF_count == (count * (count - 1))/2 ) {
             DF_Source_Stop(&DF_TFL_TABLE, 0);
         }
     }
@@ -38,8 +41,11 @@ void SOURCEB() {
     DF_SOURCE_Get_And_Update(&SOURCE_B_FN, &DF_count);
     
     {
-        DF_source_B = ((2 * DF_count) + 1) % count;
-        if (DF_count == (count * (count - 1)) / 2 ) {
+        if (count % 2 == 0)
+            DF_source_B = (2 * DF_count) % (count - 1) + 1;
+        else
+            DF_source_B = (2 * DF_count) % (count - 1) + ((DF_count % (count - 1)) >= (count - 1)/2) + 1;
+        if (DF_count == (count * (count - 1))/2) {
             DF_Source_Stop(&DF_TFL_TABLE, 1);
         }
         
@@ -88,7 +94,7 @@ int main() {
     DF_OutputInit(&DF_TFL_TABLE, 1, &DF_output_ad);
     DF_Init(&DF_TFL_TABLE, 3, &SOURCE_A_FN, &SOURCE_B_FN, &Swap_FN);
     
-    count = 25;
+    count = 1000;
     array = (int*)malloc(sizeof(int) * count);
     for (int i=0; i<count; i++) {
         array[count - i - 1] = i;
