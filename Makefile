@@ -8,6 +8,8 @@ all:
 	gcc test/bubbld_runable.o src/dfc.o threadpool/src/threadpool.o c_printf/sources/c_printf.o -lpthread -o test/bubble
 	gcc -Ithreadpool/src -Isrc -c -o test/bubbld_bean.o test/bubbld_bean.c
 	gcc test/bubbld_bean.o src/dfc.o threadpool/src/threadpool.o c_printf/sources/c_printf.o -lpthread -o test/bubbld_bean
+	gcc -Ithreadpool/src -Isrc -c -o test/bubbld_more.o test/bubbld_more.c
+	gcc test/bubbld_more.o src/dfc.o threadpool/src/threadpool.o c_printf/sources/c_printf.o -lpthread -o test/bubbld_more
 
 clean:
 	cd threadpool && make clean
@@ -15,3 +17,9 @@ clean:
 	rm src/dfc.o
 	rm test/add_runable.o
 	rm test/add_runable
+	rm test/bubbld_runable.o
+	rm test/bubble
+	rm test/bubbld_bean.o
+	rm test/bubbld_bean
+	rm test/bubbld_more.o
+	rm test/bubbld_more

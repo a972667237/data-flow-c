@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <time.h>
 //#include <sys/sysinfo.h>
 
 #include "threadpool.h"
@@ -346,6 +347,8 @@ void DF_Loop(DF_TFL* table) {
     table->thread_task = get_thread_info_addr(table->pool);
     int* count_list;
     count_list = (int*)malloc(sizeof(int) * table->Num);
+    int begin, end;
+    begin = time(NULL);
     while(1) {
         if (DF_Should_Stop(table)) {
             break;
@@ -380,11 +383,14 @@ void DF_Loop(DF_TFL* table) {
                 count_list[min_index] = 999999;
                 table->item_index_order[i] = min_index;
             }
-            order_by_item_and_hash(table->pool, table->Func_Target, table->item_index_order, table->source_list_len, table->should_hash);
+            if (table->Num > 3)
+                order_by_item_and_hash(table->pool, table->Func_Target, table->item_index_order, table->source_list_len, table->should_hash);
 
         }
 
     }
+    end = time(NULL);
+    printf("time=%d\n", end - begin);
 }
 
 void DF_Update_output(DF_TFL* table) {
@@ -474,7 +480,7 @@ void** DF_Result(DF_TFL *table) {
 
 void DF_Run (DF_TFL *table) {
     //DF_Thread_Init(table, get_nprocs() * 2, 64);
-    DF_Thread_Init(table, 20, 64);
+    DF_Thread_Init(table, 3, 64);
     DF_Loop(table);
    // DF_Source_Init(source_data_addr, datasize, elementcount); // fixed by user
     DF_Destory_And_Update_Final_Data(table);
