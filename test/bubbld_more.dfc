@@ -1,0 +1,33 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int count;
+int* array;
+int count_to_index;
+
+void SOURCEA (;int DF_source_A) {
+    if (count % 2 == 0)
+        DF_source_A = (2 * DF_count) % count_to_index;
+    else
+        DF_source_A = (2 * DF_count) % count_to_index + ((DF_count % count_to_index) >= count_to_index / 2);
+
+    if (array[DF_source_A] > array[DF_source_A + 1]) {
+        array[DF_source_A] = array[DF_source_A] ^ array[DF_source_A + 1];
+        array[DF_source_A + 1] = array[DF_source_A] ^ array[DF_source_A + 1];
+        array[DF_source_A] = array[DF_source_A] ^ array[DF_source_A + 1];
+    }
+
+    if (DF_count == (count * count_to_index)/2)
+        DF_Source_Stop();
+}
+
+int main() {
+    count = 1000;
+    count_to_index = count - 1;
+    array = (int*)malloc(sizeof(int) * count);
+    for (int i=0; i<count; i++) {
+        array[count - i - 1] = 1;
+    }
+    DF_Run();
+    return 0;
+}
