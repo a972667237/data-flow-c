@@ -170,7 +170,7 @@ void DF_AD_UpData(DF_TFL *table, DF_FN *F,...){       //地址，地址，地址
                // if now flag == finish
                // fixme: not consider that if the queue is full
                threadpool_add(table->pool, (void (*)(void *))(temp_f->Func), NULL, temp_f->item_index);
-               //printf_thread_info(table);
+               printf_thread_info(table);
                // consider that it must full in head, so if fail, all fail
                temp_f->ready = temp_r->next;
                free(temp_r);
@@ -178,7 +178,7 @@ void DF_AD_UpData(DF_TFL *table, DF_FN *F,...){       //地址，地址，地址
            pthread_mutex_unlock(&temp_f->ready_lock);
        }
        pthread_rwlock_unlock(&b->lock);
-       //printf_thread_info(table);
+       printf_thread_info(table);
    }
    va_end(ap);
 }
@@ -359,7 +359,7 @@ void DF_Loop(DF_TFL* table) {
             for (int i=0; i<table->source_list_len; i++) {
                 if (!table->source_list[i].stop) {
                     threadpool_add(table->pool, (void (*)(void *))(table->source_list[i].F->Func), NULL, table->source_list[i].F->item_index);
-                    //printf_thread_info(table);
+                    printf_thread_info(table);
                 }
             }
         }
@@ -480,7 +480,7 @@ void** DF_Result(DF_TFL *table) {
 
 void DF_Run (DF_TFL *table) {
     //DF_Thread_Init(table, get_nprocs() * 2, 64);
-    DF_Thread_Init(table, 3, 64);
+    DF_Thread_Init(table, 16, 200);
     DF_Loop(table);
    // DF_Source_Init(source_data_addr, datasize, elementcount); // fixed by user
     DF_Destory_And_Update_Final_Data(table);

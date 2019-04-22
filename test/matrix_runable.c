@@ -21,15 +21,15 @@ void SOURCEA() {
     DF_SOURCE_Get_And_Update(&SOURCE_A_FN, &DF_count);
 
     {
+        if (DF_count == width_A * height_B)
+            DF_Source_Stop(&DF_TFL_TABLE, 0);
         int i = DF_count / height_B;
         int j = DF_count % height_B;
+        if (i>=width_A)
+            return;
         C[i][j] = 0;
         for (int k=0; k<width_B; k++)
             C[i][j] += A[i][k] * B[j][k];
-        
-
-        if (DF_count == width_A * height_B)
-            DF_Source_Stop(&DF_TFL_TABLE, 0);
     }
 }
 
