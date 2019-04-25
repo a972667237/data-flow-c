@@ -25,6 +25,7 @@ clean:
 	cd threadpool && make clean
 	cd c_printf && make clean
 	rm src/dfc.o
+	rm c_printf/sources/c_printf.o
 	rm test/add_runable.o
 	rm test/add_runable
 	rm test/bubbld_bean.o
@@ -33,3 +34,5 @@ clean:
 	rm test/bubbld_more
 	rm test/matrix_runable.o
 	rm test/matrix_runable
+	rm test/complex_test_runable.o
+	rm test/complex_test_runable
