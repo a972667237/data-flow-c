@@ -1,8 +1,15 @@
+CFLAGS = -o0
+ifdef DEBUG
+CFLAGS += -DDEBUG
+endif
+ifdef THREADNUM
+CFLAGS += -DTHREADNUM=$(THREADNUM)
+endif
 all:
 	cd threadpool && make
 	cd c_printf && make
 	gcc -c -o c_printf/sources/c_printf.o c_printf/sources/c_printf.c
-	gcc -Ithreadpool/src -Ic_printf/sources -c -o src/dfc.o src/dfc.c
+	gcc ${CFLAGS} -Ithreadpool/src -Ic_printf/sources -c -o src/dfc.o src/dfc.c
 	gcc -Ithreadpool/src -Isrc -c -o test/add_runable.o test/add_runable.c
 	gcc test/add_runable.o src/dfc.o threadpool/src/threadpool.o c_printf/sources/c_printf.o -lpthread -o test/add_runable
 	gcc -Ithreadpool/src -Isrc -c -o test/bubbld_bean.o test/bubbld_bean.c

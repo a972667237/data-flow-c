@@ -170,7 +170,9 @@ void DF_AD_UpData(DF_TFL *table, DF_FN *F,...){       //地址，地址，地址
                // if now flag == finish
                // fixme: not consider that if the queue is full
                threadpool_add(table->pool, (void (*)(void *))(temp_f->Func), NULL, temp_f->item_index);
+#ifdef DEBUG
                printf_thread_info(table);
+#endif
                // consider that it must full in head, so if fail, all fail
                temp_f->ready = temp_r->next;
                free(temp_r);
@@ -178,7 +180,9 @@ void DF_AD_UpData(DF_TFL *table, DF_FN *F,...){       //地址，地址，地址
            pthread_mutex_unlock(&temp_f->ready_lock);
        }
        pthread_rwlock_unlock(&b->lock);
+#ifdef DEBUG
        printf_thread_info(table);
+#endif
    }
    va_end(ap);
 }
@@ -347,8 +351,10 @@ void DF_Loop(DF_TFL* table) {
     table->thread_task = get_thread_info_addr(table->pool);
     int* count_list;
     count_list = (int*)malloc(sizeof(int) * table->Num);
+#ifdef DEBUG
     int begin, end;
     begin = time(NULL);
+#endif
     while(1) {
         if (DF_Should_Stop(table)) {
             break;
@@ -359,7 +365,9 @@ void DF_Loop(DF_TFL* table) {
             for (int i=0; i<table->source_list_len; i++) {
                 if (!table->source_list[i].stop) {
                     threadpool_add(table->pool, (void (*)(void *))(table->source_list[i].F->Func), NULL, table->source_list[i].F->item_index);
+#ifdef DEBUG
                     printf_thread_info(table);
+#endif
                 }
             }
         }
@@ -389,8 +397,10 @@ void DF_Loop(DF_TFL* table) {
         }
 
     }
+#ifdef DEBUG
     end = time(NULL);
     printf("time=%d\n", end - begin);
+#endif
 }
 
 void DF_Update_output(DF_TFL* table) {
@@ -480,7 +490,11 @@ void** DF_Result(DF_TFL *table) {
 
 void DF_Run (DF_TFL *table) {
     //DF_Thread_Init(table, get_nprocs() * 2, 64);
+#ifdef THREADNUM
+    DF_Thread_Init(table, THREADNUM, THREADNUM * 15);
+#else
     DF_Thread_Init(table, 16, 200);
+#endif
     DF_Loop(table);
    // DF_Source_Init(source_data_addr, datasize, elementcount); // fixed by user
     DF_Destory_And_Update_Final_Data(table);
