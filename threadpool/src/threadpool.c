@@ -452,3 +452,19 @@ void order_by_item_and_hash(threadpool_t *pool, void (**Target) (void *),int* it
     free(counter);
     pthread_mutex_unlock(&(pool->lock));
 }
+
+void clean_index_in_queue(threadpool_t* pool, int index) {
+    pthread_mutex_lock(&(pool->lock));
+    int stopcount = 0;
+    for (int i=0; i<pool->count; i++) {
+        if (pool->queue[(pool->head+i)%pool->queue_size].item_index == index) {
+            stopcount ++;
+        } else {
+            if (stopcount)
+                pool->queue[(pool->head+i-stopcount)%pool->queue_size] = pool->queue[(pool->head+i)%pool->queue_size];
+        }
+    }
+    pool->count = pool->count - stopcount;
+    pool->tail = pool->tail - stopcount;
+    pthread_mutex_unlock(&(pool->lock));
+}

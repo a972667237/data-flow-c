@@ -391,6 +391,9 @@ void DF_Loop(DF_TFL* table) {
                 count_list[min_index] = 999999;
                 table->item_index_order[i] = min_index;
             }
+            // 性能点，调度任务应该尽量少执行
+            // 尝试每完成一圈任务调度一次？
+            // 目前的频度比较高
             if (table->Num > 3)
                 order_by_item_and_hash(table->pool, table->Func_Target, table->item_index_order, table->source_list_len, table->should_hash);
 
@@ -501,5 +504,6 @@ void DF_Run (DF_TFL *table) {
 }
 
 void DF_Source_Stop(DF_TFL *table, int item_index) {
+    clean_index_in_queue(table->pool, item_index);
     table->source_list[item_index].stop = 1;
 }

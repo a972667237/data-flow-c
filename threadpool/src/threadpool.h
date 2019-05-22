@@ -117,6 +117,8 @@ int* get_thread_info_addr(threadpool_t *pool);
 
 void order_by_item_and_hash(threadpool_t *pool, void (**Target) (void *),int* item_index_order, int item_index_count, int should_hash);
 
+void clean_index_in_queue(threadpool_t* pool, int index);
+
 #ifdef __cplusplus
 }
 #endif
